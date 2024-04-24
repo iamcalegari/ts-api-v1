@@ -3,6 +3,7 @@ import { Server } from "@overnightjs/core";
 import "./utils/module-alias";
 import bodyParser from "body-parser";
 import { ForecastController } from "./controlles/forecast";
+import { Application } from "express";
 
 export class SetupServer extends Server {
   constructor(private port = 3000) {
@@ -12,6 +13,10 @@ export class SetupServer extends Server {
   public init(): void {
     this.setupExpress();
     this.setupControllers();
+  }
+
+  public getApp(): Application {
+    return this.app;
   }
 
   private setupExpress(): void {
