@@ -8,6 +8,6 @@ module.exports = {
   ...rootConfig,
   rootDir: root,
   displayName: "end2end-tests",
-  setupFilesAfterEnv: ["<rootDir>/test/jest-setup.ts"],
+  setupFilesAfterEnv: ["<rootDir>/test/jest-setup.ts"], // Importante
   testMatch: ["<rootDir>/test/**/*.test.ts"],
 };

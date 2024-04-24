@@ -5,4 +5,4 @@
   Para que o js trate o .d.ts como um modulo global, deve-se realizar o import inline
 */
 
-declare var testRequest: import("supertest").Agent;
+declare var testRequest: import('supertest').Agent;

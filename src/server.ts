@@ -1,9 +1,9 @@
 // Para adicionar o alias de module-alias nos diretorios do projeto
-import { Server } from "@overnightjs/core";
-import "./utils/module-alias";
-import bodyParser from "body-parser";
-import { ForecastController } from "./controlles/forecast";
-import { Application } from "express";
+import { Server } from '@overnightjs/core';
+import './utils/module-alias';
+import bodyParser from 'body-parser';
+import { ForecastController } from './controlles/forecast';
+import { Application } from 'express';
 
 export class SetupServer extends Server {
   constructor(private port = 3000) {
