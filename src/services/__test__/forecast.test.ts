@@ -1,11 +1,7 @@
 import { StormGlass } from '@src/clients/stormGlass';
 import stormGlassNormalizedResponseFixture from '@test/fixtures/stormglass_normalized_response_3_hours.json';
-import {
-  Beach,
-  BeachPosition,
-  Forecast,
-  ForecastProcessingInternalError,
-} from '../forecast';
+import { Forecast, ForecastProcessingInternalError } from '../forecast';
+import { BeachPosition, BeachSchema } from '@src/models/beach';
 
 jest.mock('@src/clients/stormGlass');
 
@@ -21,13 +17,12 @@ describe('Forecast service', () => {
       stormGlassNormalizedResponseFixture
     );
 
-    const beaches: Beach[] = [
+    const beaches: BeachSchema[] = [
       {
         lat: -33.792726,
         lng: 151.289824,
         name: 'Manly',
         position: BeachPosition.E,
-        user: 'some-id',
       },
     ];
 
@@ -110,13 +105,12 @@ describe('Forecast service', () => {
   });
 
   it('should throw internal processing error when something goes wrong during the rating process', async () => {
-    const beaches: Beach[] = [
+    const beaches: BeachSchema[] = [
       {
         lat: -33.792726,
         lng: 151.289824,
         name: 'Manly',
         position: BeachPosition.E,
-        user: 'some-id',
       },
     ];
 
