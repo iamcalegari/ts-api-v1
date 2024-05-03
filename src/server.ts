@@ -5,6 +5,7 @@ import bodyParser from 'body-parser';
 import { ForecastController } from './controlles/forecast';
 import { Application } from 'express';
 import { Database } from './database';
+import { BeachesController } from './controlles/beaches';
 
 export class SetupServer extends Server {
   protected database: Database | undefined;
@@ -38,9 +39,10 @@ export class SetupServer extends Server {
 
   private setupControllers(): void {
     const forecastController = new ForecastController();
+    const beachesController = new BeachesController();
 
     // Passando o controller para o express via overnight
-    this.addControllers([forecastController]);
+    this.addControllers([forecastController, beachesController]);
   }
 
   private async setupDatabase(): Promise<void> {
