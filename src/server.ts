@@ -2,10 +2,10 @@
 import { Server } from '@overnightjs/core';
 import './utils/module-alias';
 import bodyParser from 'body-parser';
-import { ForecastController } from './controlles/forecast';
+import { ForecastController } from './controllers/forecast';
 import { Application } from 'express';
-import { Database, database } from './database';
-import { BeachesController } from './controlles/beaches';
+import { Database, database } from './database/database';
+import { BeachesController } from './controllers/beaches';
 
 export class SetupServer extends Server {
   protected database: Database = database;

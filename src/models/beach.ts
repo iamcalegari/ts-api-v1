@@ -1,17 +1,13 @@
-import {
-  MetodosEnum,
-  Model,
-  ModelValidationSchema,
-  database,
-} from '@src/database';
+import { Methods, database } from '@src/database/database';
+import { Model, ModelValidationSchema } from '@src/database/model';
 import { ObjectId } from 'mongodb';
 
 const allowedMethods = [
-  MetodosEnum.ATUALIZAR,
-  MetodosEnum.CADASTRAR,
-  MetodosEnum.CADASTRAR_VARIOS,
-  MetodosEnum.CONSULTAR,
-  MetodosEnum.RECUPERAR,
+  Methods.UPDATE,
+  Methods.INSERT,
+  Methods.INSERT_MANY,
+  Methods.FIND_MANY,
+  Methods.FIND,
 ];
 
 export enum BeachPosition {

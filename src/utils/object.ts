@@ -1,6 +1,6 @@
 import { ObjectId } from 'bson';
 
-export function removerDadosIndefinidos(obj: any): object {
+export function deleteUndefinedData(obj: any): object {
   if (
     typeof obj !== 'object' ||
     obj === null ||
@@ -12,15 +12,13 @@ export function removerDadosIndefinidos(obj: any): object {
   }
 
   if (Array.isArray(obj)) {
-    return obj
-      .map(removerDadosIndefinidos)
-      .filter((value) => value !== undefined);
+    return obj.map(deleteUndefinedData).filter((value) => value !== undefined);
   }
 
   const newObj: any = {};
 
   for (const key in obj) {
-    const value = removerDadosIndefinidos(obj[key]);
+    const value = deleteUndefinedData(obj[key]);
 
     if (value !== undefined) {
       newObj[key] = value;

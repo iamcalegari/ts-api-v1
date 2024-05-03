@@ -5,7 +5,7 @@
 
 import { SetupServer } from '@src/server';
 import supertest from 'supertest';
-import { database } from '@src/database';
+import { database } from '@src/database/database';
 
 let server: SetupServer;
 

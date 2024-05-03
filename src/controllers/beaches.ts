@@ -8,7 +8,7 @@ export class BeachesController {
   @Post('')
   public async create(req: Request, res: Response): Promise<void> {
     try {
-      const beach = await Beach.cadastrar(req.body);
+      const beach = await Beach.insert(req.body);
 
       res.status(201).send(beach);
     } catch (err: any) {
