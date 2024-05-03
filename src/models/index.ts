@@ -1,0 +1,1 @@
+export { Beach } from './beach';

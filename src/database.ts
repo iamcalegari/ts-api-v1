@@ -22,8 +22,10 @@ import {
   WithId,
   FindOneAndDeleteOptions,
   CountDocumentsOptions,
+  MongoError,
 } from 'mongodb';
 import { removerDadosIndefinidos } from './utils/object';
+import { InternalError } from './utils/errors/internal-error';
 
 export type CreateIndexProps = {
   key: IndexSpecification;
@@ -188,6 +190,93 @@ export class Database {
 
   static objectId(): ObjectId {
     return new ObjectId();
+  }
+
+  static async loadModels(modelsPath: string) {
+    await import(modelsPath);
+  }
+
+  async setupCollections(): Promise<void> {
+    const modelArray = Database.modelMap.values();
+
+    for (const model of modelArray) {
+      await this.setupCollection(model);
+    }
+  }
+
+  async setupCollection(model: Model<Document>): Promise<void> {
+    const collectionExists = await this.collectionExists(model.collectionName);
+
+    if (!collectionExists) {
+      await this.db?.createCollection(model.collectionName);
+    }
+
+    if (model.validator) {
+      await this.setupValidators(model);
+    }
+
+    await this.setupIndexes(model);
+  }
+
+  private async collectionExists(collectionName: string): Promise<boolean> {
+    const collectionNames = await this.db
+      ?.listCollections()
+      .map((collInfo) => collInfo.name)
+      .toArray();
+
+    return Boolean(
+      collectionNames?.some((collName) => collName === collectionName)
+    );
+  }
+
+  private async setupValidators(model: Model<Document>) {
+    const validators = {
+      validator: model.validator,
+      validationAction: model.validationAction,
+      validationLevel: model.validationLevel,
+    };
+
+    await this.db?.command({
+      collMod: model.collectionName,
+      ...validators,
+    });
+  }
+
+  private async setupIndexes(model: Model<Document>) {
+    const collection = this.db?.collection(model.collectionName);
+
+    await collection?.dropIndexes();
+
+    const newIndexes = model.indexes;
+
+    for (const newIndex of newIndexes) {
+      const { key, ...options } = newIndex;
+
+      await collection?.createIndex(key, options);
+    }
+  }
+
+  async cleanCollections() {
+    if (!this.db) {
+      return;
+    }
+
+    const collectionsInfo = await this.db.collections();
+
+    if (!collectionsInfo) {
+      return;
+    }
+
+    for (const { collectionName } of collectionsInfo) {
+      const collection = this.db?.collection(collectionName);
+      const count = (await collection?.countDocuments()) ?? 0;
+
+      if (count <= 0) {
+        continue;
+      }
+
+      await collection?.deleteMany({});
+    }
   }
 }
 
@@ -355,12 +444,16 @@ export class Model<ModelType extends Document> {
       this.collectionName
     ) as Collection<ModelType>;
 
-    const { insertedId } = await collection.insertOne(
-      { ..._document },
-      options
-    );
+    try {
+      const { insertedId } = await collection.insertOne(
+        { ..._document },
+        options
+      );
 
-    return { _id: insertedId, ..._document } as WithId<ModelType>;
+      return { _id: insertedId, ..._document } as WithId<ModelType>;
+    } catch (err: any) {
+      throw new MongoError(err.message);
+    }
   }
 
   cadastrarVarios(
