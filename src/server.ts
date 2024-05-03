@@ -4,11 +4,11 @@ import './utils/module-alias';
 import bodyParser from 'body-parser';
 import { ForecastController } from './controlles/forecast';
 import { Application } from 'express';
-import { Database } from './database';
+import { Database, database } from './database';
 import { BeachesController } from './controlles/beaches';
 
 export class SetupServer extends Server {
-  protected database: Database | undefined;
+  protected database: Database = database;
 
   constructor(private port = 3000) {
     super();
@@ -23,9 +23,7 @@ export class SetupServer extends Server {
   }
 
   public async close(): Promise<void> {
-    await this.database!.disconnect();
-
-    this.database = undefined;
+    await this.database.disconnect();
   }
 
   public getApp(): Application {
@@ -46,8 +44,6 @@ export class SetupServer extends Server {
   }
 
   private async setupDatabase(): Promise<void> {
-    this.database = new Database();
-
     await this.database.connect();
   }
 }
