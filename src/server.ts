@@ -4,15 +4,27 @@ import './utils/module-alias';
 import bodyParser from 'body-parser';
 import { ForecastController } from './controlles/forecast';
 import { Application } from 'express';
+import { Database } from './database';
 
 export class SetupServer extends Server {
+  protected database: Database | undefined;
+
   constructor(private port = 3000) {
     super();
   }
 
-  public init(): void {
+  public async init(): Promise<void> {
     this.setupExpress();
+
     this.setupControllers();
+
+    await this.setupDatabase();
+  }
+
+  public async close(): Promise<void> {
+    await this.database!.disconnect();
+
+    this.database = undefined;
   }
 
   public getApp(): Application {
@@ -29,5 +41,11 @@ export class SetupServer extends Server {
 
     // Passando o controller para o express via overnight
     this.addControllers([forecastController]);
+  }
+
+  private async setupDatabase(): Promise<void> {
+    this.database = new Database();
+
+    await this.database.connect();
   }
 }

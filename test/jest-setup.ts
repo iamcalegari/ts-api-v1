@@ -6,10 +6,16 @@
 import { SetupServer } from '@src/server';
 import supertest from 'supertest';
 
-beforeAll(() => {
-  const server = new SetupServer();
-  server.init();
+let server: SetupServer;
+
+beforeAll(async () => {
+  server = new SetupServer();
+  await server.init();
 
   // Setando globalmente o server para ser usado em todos os testes utilizando o supertest
   global.testRequest = supertest(server.getApp());
+});
+
+afterAll(async () => {
+  await server.close();
 });
