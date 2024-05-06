@@ -1,6 +1,8 @@
 import { CreateIndexProps, Methods, database } from '@src/database/database';
-import { Model, ModelValidationSchema } from '@src/database/model';
+import { ModelValidationSchema } from '@src/database/model';
 import { ObjectId } from 'mongodb';
+
+import AuthService from '@src/services/auth';
 
 const allowedMethods = [
   Methods.UPDATE,
@@ -45,9 +47,27 @@ const index: CreateIndexProps[] = [
   },
 ];
 
+export async function hasDuplicatedEmail(email: string): Promise<boolean> {
+  const user = await User.total({ email });
+
+  return user !== 0;
+}
+
 export const User = database.defineModel<UserSchema>({
   collectionName: 'users',
   schema: schema,
   allowedMethods: allowedMethods,
   indexes: index,
+});
+
+User.pre<UserSchema>(Methods.INSERT, async function (): Promise<void> {
+  if (!this.password) {
+    return;
+  }
+
+  try {
+    this.password = await AuthService.hashPassword(this.password);
+  } catch (err: any) {
+    console.log(`Error hashing password: ${err} for ${this.name}`);
+  }
 });

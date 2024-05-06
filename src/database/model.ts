@@ -75,6 +75,20 @@ export class Model<ModelType extends Document> {
 
   documentDefaults: Record<string, any>;
 
+  preMethod: Record<Methods, Function> = {
+    [Methods.UPDATE]: () => {},
+    [Methods.INSERT]: () => {},
+    [Methods.FIND_MANY]: () => {},
+    [Methods.FIND]: () => {},
+    [Methods.TOTAL]: () => {},
+    [Methods.FIND_BY_ID]: () => {},
+    [Methods.DELETE]: () => {},
+    [Methods.AGGREGATE]: () => {},
+    [Methods.INSERT_MANY]: () => {},
+    [Methods.DELETE_MANY]: () => {},
+    [Methods.BULK_WRITE]: () => {},
+  };
+
   static create<ModelType extends Document>(
     props: CreateModelProps
   ): Model<ModelType> {
@@ -158,6 +172,13 @@ export class Model<ModelType extends Document> {
     return schema;
   }
 
+  pre<T extends ModelType>(
+    methodName: Methods,
+    transformer: (this: T, ...args: any[]) => void
+  ) {
+    this.preMethod[methodName] = transformer;
+  }
+
   agregar(pipeline: Document[], options: AggregateOptions = {}) {
     const collection = database.getCollection<ModelType>(
       this.collectionName
@@ -171,6 +192,8 @@ export class Model<ModelType extends Document> {
     update: UpdateFilter<ModelType>,
     options: FindOneAndUpdateOptions = {}
   ) {
+    await this.preMethod[Methods.INSERT_MANY].bind(update.$set)();
+
     const cleanedUpdate = {
       ...update,
       ...(update.$set && { $set: deleteUndefinedData(update.$set) }),
@@ -212,6 +235,8 @@ export class Model<ModelType extends Document> {
     document: OptionalUnlessRequiredId<ModelType>,
     options: InsertOneOptions = {}
   ) {
+    await this.preMethod[Methods.INSERT].bind(document)();
+
     const _document = deleteUndefinedData({
       ...this.documentDefaults,
       ...deleteUndefinedData(document),
@@ -232,10 +257,12 @@ export class Model<ModelType extends Document> {
     }
   }
 
-  insertMany(
+  async insertMany(
     documents: OptionalUnlessRequiredId<ModelType>[],
     options: BulkWriteOptions = {}
   ) {
+    await this.preMethod[Methods.INSERT_MANY].bind(documents)();
+
     const _documents = documents.map((doc) => ({
       ...this.documentDefaults,
       ...deleteUndefinedData(doc),
