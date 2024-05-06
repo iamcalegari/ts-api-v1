@@ -1,4 +1,4 @@
-import { Methods, database } from '@src/database/database';
+import { CreateIndexProps, Methods, database } from '@src/database/database';
 import { Model, ModelValidationSchema } from '@src/database/model';
 import { ObjectId } from 'mongodb';
 
@@ -37,8 +37,17 @@ const schema: ModelValidationSchema = {
   required: ['name', 'email', 'password'],
 };
 
+const index: CreateIndexProps[] = [
+  {
+    key: { email: 1 },
+    name: 'email_id',
+    unique: true,
+  },
+];
+
 export const User = database.defineModel<UserSchema>({
   collectionName: 'users',
   schema: schema,
   allowedMethods: allowedMethods,
+  indexes: index,
 });

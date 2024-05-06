@@ -28,6 +28,10 @@ export enum Methods {
   TOTAL = 'total',
 }
 
+export enum CUSTOM_VALIDATION {
+  UNIQUE = 'unique',
+}
+
 const dbConfig: IConfig = config.get('App.database');
 
 export class Database {

@@ -1,25 +1,30 @@
 import { Controller, Post } from '@overnightjs/core';
 import { Request, Response } from 'express';
-import { User, UserSchema } from '@src/models/user';
+import { User } from '@src/models/user';
+import { BaseController } from '.';
+import { CUSTOM_VALIDATION } from '@src/database/database';
 
 @Controller('users')
-export class UsersController {
+export class UsersController extends BaseController {
   @Post('')
   public async create(req: Request, res: Response): Promise<void> {
-    if (await this.hasUser(req.body)) {
-      res.status(409).send({
-        error: 'User with given email already exists',
-      });
-      return;
-    }
+    try {
+      const newUser = await User.insert(req.body);
+      res.status(201).send(newUser);
+    } catch (err: any) {
+      if (await this.hasDuplicatedEmail(req.body.email)) {
+        err.kind = CUSTOM_VALIDATION.UNIQUE;
 
-    const newUser = await User.insert(req.body);
-    res.status(201).send(newUser);
+        this.sendCreatedUpdatedErrorResponse(res, err, 409);
+        return;
+      }
+      this.sendCreatedUpdatedErrorResponse(res, err);
+    }
   }
 
-  private async hasUser(newUser: UserSchema): Promise<boolean> {
-    const user = await User.total({ email: newUser.email });
+  private async hasDuplicatedEmail(email: string): Promise<boolean> {
+    const user = await User.total({ email });
 
-    return !!user;
+    return user !== 0;
   }
 }
