@@ -23,6 +23,7 @@ export interface BeachSchema {
   lng: number;
   name: string;
   position: BeachPosition;
+  user: ObjectId | string;
 }
 
 const schema: ModelValidationSchema = {
@@ -45,8 +46,12 @@ const schema: ModelValidationSchema = {
       enum: ['S', 'E', 'N', 'W'],
       description: 'The position of the beach is facing on the map',
     },
+    user: {
+      bsonType: 'objectId',
+      description: 'The id of the user',
+    },
   },
-  required: ['lat', 'lng', 'name', 'position'],
+  required: ['lat', 'lng', 'name', 'position', 'user'],
 };
 
 interface BeachModel extends Model<BeachSchema> {}
