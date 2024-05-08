@@ -1,3 +1,4 @@
+import { User } from '@src/models/user';
 import AuthService from '@src/services/auth';
 
 describe('Users functional tests', () => {
@@ -54,6 +55,55 @@ describe('Users functional tests', () => {
         error:
           'E11000 duplicate key error collection: surf-forecast.users index: email_id dup key: { email: "john@mail.com" }',
       });
+    });
+  });
+
+  describe('When authenticating an user', () => {
+    it('Should generate a JWT token for a valid user', async () => {
+      const newUser = {
+        name: 'John Doe',
+        email: 'john@mail.com',
+        password: '1234',
+      };
+
+      await User.insert(newUser);
+
+      const response = await global.testRequest
+        .post('/users/authenticate')
+        .send(newUser);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({ token: expect.any(String) });
+    });
+
+    it('Should return UNAUTHORIZED if the user does not exist', async () => {
+      const response = await global.testRequest
+        .post('/users/authenticate')
+        .send({
+          email: 'john@mail.com',
+          password: '1234',
+        });
+
+      expect(response.status).toBe(401);
+    });
+
+    it('Should return UNAUTHORIZED if the user exists but the password does not match', async () => {
+      const newUser = {
+        name: 'John Doe',
+        email: 'john@mail.com',
+        password: '1234',
+      };
+
+      await User.insert(newUser);
+
+      const response = await global.testRequest
+        .post('/users/authenticate')
+        .send({
+          email: 'john@mail.com',
+          password: '4321',
+        });
+
+      expect(response.status).toBe(401);
     });
   });
 });

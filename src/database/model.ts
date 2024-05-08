@@ -235,11 +235,13 @@ export class Model<ModelType extends Document> {
     document: OptionalUnlessRequiredId<ModelType>,
     options: InsertOneOptions = {}
   ) {
-    await this.preMethod[Methods.INSERT].bind(document)();
+    const shallowCopy = { ...document };
+
+    await this.preMethod[Methods.INSERT].bind(shallowCopy)();
 
     const _document = deleteUndefinedData({
       ...this.documentDefaults,
-      ...deleteUndefinedData(document),
+      ...deleteUndefinedData(shallowCopy),
     }) as OptionalUnlessRequiredId<ModelType>;
     const collection = database.getCollection<ModelType>(
       this.collectionName

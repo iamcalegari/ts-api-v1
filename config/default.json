@@ -5,6 +5,10 @@
       "mongoUrl": "mongodb://127.0.0.1:27017/",
       "dbName": "surf-forecast"
     },
+    "auth": {
+      "key": "do-not-hard-code",
+      "tokenExpiresIn": "1d"
+    },
     "resources": {
       "StormGlass": {
         "apiUrl": "https://api.stormglass.io/v2",

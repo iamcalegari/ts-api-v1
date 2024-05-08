@@ -3,6 +3,7 @@ import { Request, Response } from 'express';
 import { User, hasDuplicatedEmail } from '@src/models/user';
 import { BaseController } from '.';
 import { CUSTOM_VALIDATION } from '@src/database/database';
+import AuthService from '@src/services/auth';
 
 @Controller('users')
 export class UsersController extends BaseController {
@@ -21,5 +22,30 @@ export class UsersController extends BaseController {
       }
       this.sendCreatedUpdatedErrorResponse(res, err);
     }
+  }
+
+  @Post('authenticate')
+  public async authenticate(req: Request, res: Response): Promise<Response> {
+    const { email, password } = req.body;
+
+    const user = await User.find({ email: email });
+
+    if (!user) {
+      return res.status(401).send({
+        code: 401,
+        error: 'User not found!',
+      });
+    }
+
+    if (!(await AuthService.comparePasswords(password, user.password))) {
+      return res.status(401).send({
+        code: 401,
+        error: 'Password does not match!',
+      });
+    }
+
+    const token = AuthService.generateToken(user);
+
+    return res.status(200).send({ token: token });
   }
 }

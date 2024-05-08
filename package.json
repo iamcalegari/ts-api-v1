@@ -46,12 +46,14 @@
   },
   "dependencies": {
     "@overnightjs/core": "^1.7.6",
+    "@types/jsonwebtoken": "^9.0.6",
     "axios": "^1.6.8",
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.2",
     "config": "^3.3.11",
     "express": "^4.19.2",
     "json-schema": "^0.4.0",
+    "jsonwebtoken": "^9.0.2",
     "module-alias": "^2.2.3",
     "mongodb": "^6.5.0"
   }
