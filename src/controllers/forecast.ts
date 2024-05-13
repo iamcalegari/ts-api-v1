@@ -17,7 +17,7 @@ export class ForecastController {
   ): Promise<void> {
     // Retorna void porque rotas do express utilizam res.send()
     try {
-      const userId = Database.toObjectId(req.decoded?._id);
+      const userId = Database.toObjectId(req.context?.userId);
       const beaches = await Beach.findMany({ user: userId });
 
       const forecastData = await forecast.processForecastForBeaches(beaches);

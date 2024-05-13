@@ -13,7 +13,7 @@ export class BeachesController {
     try {
       const beach = await Beach.insert({
         ...req.body,
-        user: Database.toObjectId(req.decoded?._id),
+        user: Database.toObjectId(req.context?.userId),
       });
 
       res.status(201).send(beach);

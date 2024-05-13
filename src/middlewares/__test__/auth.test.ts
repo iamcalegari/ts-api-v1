@@ -4,7 +4,7 @@ import { Request } from 'express';
 
 describe('Auth middleware', () => {
   it('Should verify if JWT token and call next middleware', async () => {
-    const jwtToken = AuthService.generateToken({ data: 'fake' });
+    const jwtToken = AuthService.generateToken('fake-user-id');
 
     const reqFake = {
       headers: {

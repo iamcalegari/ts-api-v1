@@ -12,7 +12,7 @@ describe('Beaches functional tests', () => {
 
   beforeEach(async () => {
     const user = await User.insert(defaultUser);
-    token = AuthService.generateToken(user);
+    token = AuthService.generateToken(user._id.toString());
   });
   describe('When creating a beach', () => {
     it('Should create a beach with success', async () => {

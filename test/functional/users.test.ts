@@ -66,14 +66,16 @@ describe('Users functional tests', () => {
         password: '1234',
       };
 
-      await User.insert(newUser);
+      const user = await User.insert(newUser);
 
       const response = await global.testRequest
         .post('/users/authenticate')
         .send(newUser);
 
+      const JwtClaims = AuthService.decodeToken(response.body.token);
+
       expect(response.status).toBe(200);
-      expect(response.body).toEqual({ token: expect.any(String) });
+      expect(JwtClaims).toMatchObject({ sub: user._id.toString() });
     });
 
     it('Should return UNAUTHORIZED if the user does not exist', async () => {
@@ -104,6 +106,35 @@ describe('Users functional tests', () => {
         });
 
       expect(response.status).toBe(401);
+    });
+  });
+
+  describe('When getting user profile info', () => {
+    it(`Should return the token's owner profile information`, async () => {
+      const newUser = {
+        name: 'John Doe',
+        email: 'john@mail.com',
+        password: '1234',
+      };
+
+      const user = await User.insert(newUser);
+      const token = AuthService.generateToken(user._id.toString());
+      const { body, status } = await global.testRequest.get('/users/me').set({
+        'x-access-token': token,
+      });
+
+      expect(status).toBe(200);
+      expect(body).toMatchObject(JSON.parse(JSON.stringify({ user })));
+    });
+
+    it(`Should return Not Found, when the user is not found`, async () => {
+      const token = AuthService.generateToken('fake-user-id');
+      const { body, status } = await global.testRequest
+        .get('/users/me')
+        .set({ 'x-access-token': token });
+
+      expect(status).toBe(404);
+      expect(body.message).toBe('User not found!');
     });
   });
 });

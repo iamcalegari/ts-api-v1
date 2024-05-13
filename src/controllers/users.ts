@@ -1,9 +1,10 @@
-import { Controller, Post } from '@overnightjs/core';
+import { Controller, Get, Middleware, Post } from '@overnightjs/core';
 import { Request, Response } from 'express';
 import { User, hasDuplicatedEmail } from '@src/models/user';
 import { BaseController } from '.';
-import { CUSTOM_VALIDATION } from '@src/database/database';
+import { CUSTOM_VALIDATION, Database } from '@src/database/database';
 import AuthService from '@src/services/auth';
+import { authMiddleware } from '@src/middlewares/auth';
 
 @Controller('users')
 export class UsersController extends BaseController {
@@ -44,8 +45,20 @@ export class UsersController extends BaseController {
       });
     }
 
-    const token = AuthService.generateToken(user);
+    const token = AuthService.generateToken(user._id.toString());
 
     return res.status(200).send({ token: token });
+  }
+
+  @Get('me')
+  @Middleware(authMiddleware)
+  public async me(req: Request, res: Response): Promise<Response> {
+    const userId = req.context?.userId;
+    try {
+      const user = await User.find({ _id: Database.toObjectId(userId) });
+      return res.status(200).send({ user });
+    } catch (err: any) {
+      return res.status(404).send({ message: 'User not found!' });
+    }
   }
 }
